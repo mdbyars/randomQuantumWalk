@@ -19,7 +19,10 @@
 # Import numpy and matplotlib.pyplot
 import numpy as np, matplotlib.pyplot as plt, matplotlib as mpt
 from mpl_toolkits.mplot3d import Axes3D # Import 3D plotting
-import matplotlib.animation as animatio
+import matplotlib.animation as animation
+import matplotlib.tri as mtri
+import stl 
+from stl import mesh 
 #################
 # Begin Program #
 #################
@@ -30,7 +33,7 @@ import matplotlib.animation as animatio
 ############################################################
 
 # Define the positions and number of steps
-N = 20      # number of random steps
+N = 50    # number of random steps
 P = 2*N+1    # number of positions
 
 # Define the two states a quantum coin can be in a superposition of
@@ -79,13 +82,29 @@ for j in time:
       
 # Set the x and y values
 xval, yval = np.arange(P), time
-
 # Mesh the x and y values together
 xval, yval = np.meshgrid(xval, yval)
-
+##print(len(xval[1]), len(yval[1]), len(prob[1]))
 # Begin plotting the graph
+xyz = {}
+#print(len(prob)*len(prob[0]))
+i=0
+j=0
+k = 0
+onprob=0
+print(len(prob)*len(prob[0]))
+for k in range(len(prob)):
+	for i in range(len(prob[k])):
+	#	for j in range(len(prob[0])):
+			xyz[onprob]=(k, i, prob[k][i])
+			onprob=onprob+1
+			print(k, i, prob[k][i])
+
+#print(xyz)
+
 fig = plt.figure() # Create an overall figure
 ax = fig.add_subplot(111, projection='3d') # Add a 3D plot
+
 
 # NOTE: Only plots non-zero values
 ax.plot_surface(xval, yval, prob, rstride=1, cstride=1, vmin=0, vmax=0.1, cmap=mpt.cm.coolwarm) # Plot the data
@@ -99,33 +118,15 @@ ax.set_zlabel("Probability") # Set z label
 
 plt.show() # Show the graph
 
-nfr = 30 # Number of frames
-fps = 10 # Frame per sec
-xs = []
-ys = []
-zs = []
-ss = np.arange(1,nfr,0.5)
-for s in ss:
-    xs.append(normal(50,s,200))
-    ys.append(normal(50,s,200))
-    zs.append(normal(50,s,200))
+#triang=mtri.Triangulation(x,y,prob)
+#data = np.zeros(len(triang.triangles), dtype=mesh.Mesh.dtype)
+#mobius_mesh = mesh.Mesh(data, remove_empty_areas=False)
+#mobius_mesh.x[:] = x[triang.triangles]
+#mobius_mesh.y[:] = y[triang.triangles]
+#mobius_mesh.z[:] = prob[triang.triangles]
 
-fig = plt.figure()
-ax = fig.add_subplot(111, projection='3d')
-sct, = ax.plot([], [], [], "o", markersize=2)
-def update(ifrm, xa, ya, za):
-    sct.set_data(xa[ifrm], ya[ifrm])
-    sct.set_3d_properties(za[ifrm])
-ax.set_xlim(0,100)
-ax.set_ylim(0,100)
-ax.set_zlim(0,100)
-ani = animation.FuncAnimation(fig, update, nfr, fargs=(xs,ys,zs), interval=1000/fps)
-fn = 'plot_3d_scatter_funcanimation'
-ani.save(fn+'.mp4',writer='ffmpeg',fps=fps)
-ani.save(fn+'.gif',writer='imagemagick',fps=fps)
-import subprocess
-cmd = 'magick convert %s.gif -fuzz 5%% -layers Optimize %s_r.gif'%(fn,fn)
-subprocess.check_output(cmd)
+#mobius_mesh.save('mysurface.stl')
+#plt.style.use('seaborn-pastel')
 ###############
 # End Program #
 ###############

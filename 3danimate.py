@@ -29,6 +29,7 @@ from mpl_toolkits.mplot3d import Axes3D
 import numpy as np, matplotlib.pyplot as plt, matplotlib as mpt
 from mpl_toolkits.mplot3d import Axes3D # Import 3D plotting
 import matplotlib.animation as animatio
+import stl
 #################
 # Begin Program #
 #################
@@ -124,9 +125,9 @@ def func(num, dataSet, line):
  
  
 # THE DATA POINTS
-t = time # This would be the z-axis ('t' means time here)
-x = xval
-y = yval
+t = np.arange(0,20,0.2) # This would be the z-axis ('t' means time here)
+x = np.cos(t)-1
+y = 1/2*(np.cos(2*t)-1)
 dataSet = np.array([x, y, t])
 numDataPoints = len(t)
  
@@ -135,7 +136,7 @@ fig = plt.figure()
 ax = Axes3D(fig)
  
 # NOTE: Can't pass empty arrays into 3d version of plot()
-line = plt.plot(t, x, y, lw=2, c='g')[0] # For line plot
+line = plt.plot(dataSet[0], dataSet[1], dataSet[2], lw=2, c='g')[0] # For line plot
  
 # AXES PROPERTIES]
 # ax.set_xlim3d([limit0, limit1])
@@ -150,3 +151,11 @@ line_ani = animation.FuncAnimation(fig, func, frames=numDataPoints, fargs=(dataS
  
  
 plt.show()
+
+triang=triangulation(x,y,t)
+data = np.zeros(len(triang.triangles), dtype=mesh.Mesh.dtype)
+mobius_mesh = mesh.Mesh(data, remove_empty_areas=False)
+mobius_mesh.x[:] = x[triang.triangles]
+mobius_mesh.y[:] = y[triang.triangles]
+mobius_mesh.z[:] = t[triang.triangles]
+mobius_mesh.save('mysurface.stl')
